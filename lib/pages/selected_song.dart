@@ -1,16 +1,24 @@
 // ignore_for_file: avoid_print, must_be_immutable, deprecated_member_use
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:practica1/providers/favorite_song_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-class SelectedSong extends StatelessWidget {
+class SelectedSong extends StatefulWidget {
   final dynamic songData;
   bool isFavorite;
   SelectedSong({super.key, required this.songData, required this.isFavorite});
 
+  @override
+  State<SelectedSong> createState() => _SelectedSongState();
+}
+
+class _SelectedSongState extends State<SelectedSong> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +27,24 @@ class SelectedSong extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.favorite),
-            tooltip: 'Eliminar de favoritos',
-            onPressed: () {
-              if (isFavorite) {
+            tooltip: widget.isFavorite
+                ? 'Eliminar de favoritos'
+                : 'Agregar a favoritos',
+            onPressed: () async {
+              if (widget.isFavorite) {
                 addAlert(context);
               } else {
-                context.read<FavoriteProvider>().addNewSong(songData);
-                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    snackBarProcess(context, 'Agregando a favoritos...'));
+
+                await _addSong(widget.songData);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                    snackBarProcess(context, 'Canción agregada a favoritos'));
+                // Navigator.of(context).pop();
               }
+              widget.isFavorite = !widget.isFavorite;
+              setState(() {});
             },
           ),
         ],
@@ -36,24 +54,23 @@ class SelectedSong extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.network(
-                "${songData["spotify"]["album"]["images"][0]["url"]}"),
+            Image.network("${widget.songData["cover_url"]}"),
             Padding(
               padding: const EdgeInsets.only(top: 32.0),
               child: Text(
-                "${songData["title"]}",
+                "${widget.songData["title"]}",
                 style:
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
                 textAlign: TextAlign.center,
               ),
             ),
             Text(
-              "${songData["album"]}",
+              "${widget.songData["album"]}",
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               textAlign: TextAlign.center,
             ),
-            subText("${songData["artist"]}"),
-            subText("${songData["release_date"]}"),
+            subText("${widget.songData["artist"]}"),
+            subText("${widget.songData["release_date"]}"),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Divider(
@@ -71,17 +88,30 @@ class SelectedSong extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                platformButton(
-                    "${songData["spotify"]["external_urls"]["spotify"]}",
+                platformButton("${widget.songData["spotify_url"]}",
                     FaIcon(FontAwesomeIcons.spotify)),
-                platformButton("${songData["deezer"]["link"]}",
+                platformButton("${widget.songData["deezer_url"]}",
                     FaIcon(FontAwesomeIcons.deezer)),
-                platformButton("${songData["apple_music"]["url"]}",
+                platformButton("${widget.songData["apple_music_url"]}",
                     FaIcon(FontAwesomeIcons.apple)),
+                platformButton("${widget.songData["other_urls"]}",
+                    FaIcon(FontAwesomeIcons.music)),
               ],
             )
           ],
         ),
+      ),
+    );
+  }
+
+  SnackBar snackBarProcess(BuildContext context, String text) {
+    return SnackBar(
+      content: Text(text),
+      action: SnackBarAction(
+        label: 'ok',
+        onPressed: () {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        },
       ),
     );
   }
@@ -120,9 +150,10 @@ class SelectedSong extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context, 'Eliminar');
-              print('DELETE $songData to favorites');
-              context.read<FavoriteProvider>().deleteSong(songData);
-              isFavorite = true;
+              print('DELETE ${widget.songData} to favorites');
+              _deleteSong(widget.songData);
+              // widget.isFavorite = !widget.isFavorite;
+              // setState(() {});
             },
             child: const Text('Eliminar'),
           ),
@@ -132,6 +163,18 @@ class SelectedSong extends StatelessWidget {
   }
 
   Future<void> _launchURL(String url) async {
-    if (!await launch(url)) throw 'No se pudo acceder a: $url';
+    try {
+      await launch(url);
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  Future<void> _addSong(sonData) async {
+    await context.read<FavoriteProvider>().addNewSong(widget.songData);
+  }
+
+  Future<void> _deleteSong(songData) async {
+    await context.read<FavoriteProvider>().deleteSong(widget.songData);
   }
 }

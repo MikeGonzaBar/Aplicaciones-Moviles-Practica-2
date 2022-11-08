@@ -1,12 +1,13 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print, library_private_types_in_public_api
-
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:practica1/pages/favorites.dart';
+import 'package:practica1/pages/login_page.dart';
 import 'package:practica1/pages/selected_song.dart';
 import 'package:practica1/providers/favorite_song_provider.dart';
 import 'package:provider/provider.dart';
@@ -68,21 +69,46 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const Favorites(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                FloatingActionButton(
+                  heroTag: "btn1",
+                  onPressed: () async {
+                    await context.read<FavoriteProvider>().getSongsList();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const Favorites(),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.pink[500],
+                  tooltip: "Ver favoritos",
+                  child: const Icon(
+                    Icons.favorite,
+                    color: Colors.lightBlue,
+                    size: 35,
                   ),
-                );
-              },
-              backgroundColor: Colors.pink[500],
-              tooltip: "Ver favoritos",
-              child: const Icon(
-                Icons.favorite,
-                color: Colors.lightBlue,
-                size: 35,
-              ),
+                ),
+                FloatingActionButton(
+                  heroTag: "btn2",
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage(),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.pink[500],
+                  tooltip: "Cerrar sesión",
+                  child: const Icon(
+                    Icons.power_settings_new_outlined,
+                    color: Colors.lightBlue,
+                    size: 35,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -94,7 +120,7 @@ class _HomePageState extends State<HomePage> {
     Directory? appDocDir = await getExternalStorageDirectory();
     String? appPath = appDocDir?.path;
 
-    print(appPath);
+    log(appPath.toString());
     if (await record.hasPermission()) {
       // Start recording
       await record.start(
@@ -112,10 +138,10 @@ class _HomePageState extends State<HomePage> {
         const Duration(seconds: 4),
         () async {
           String? songPath = await record.stop();
-          print(songPath);
+          log(songPath.toString());
           dynamic detectedSong =
               await context.read<FavoriteProvider>().searchSong(songPath!);
-          print("Spotify: $detectedSong");
+          log("Spotify: $detectedSong");
           if (detectedSong == null) {
             final snackBar = SnackBar(
               content: const Text(
@@ -136,7 +162,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => SelectedSong(
-                isFavorite: true,
+                isFavorite: false,
                 songData: detectedSong,
               ),
             ),

@@ -3,10 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:practica1/pages/selected_song.dart';
 
-class FavoritesItem extends StatelessWidget {
+class FavoritesItem extends StatefulWidget {
   final dynamic songData;
   const FavoritesItem({super.key, required this.songData});
 
+  @override
+  State<FavoritesItem> createState() => _FavoritesItemState();
+}
+
+class _FavoritesItemState extends State<FavoritesItem> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,19 +26,18 @@ class FavoritesItem extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(
-                        "${songData["spotify"]["album"]["images"][0]["url"]}",
+                    image: NetworkImage("${widget.songData["cover_url"]}",
                         scale: 1),
                   ),
                 ),
               ),
               // ),
               onPressed: () {
-                print(songData);
+                print(widget.songData);
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => SelectedSong(
-                      songData: songData,
+                      songData: widget.songData,
                       isFavorite: true,
                     ),
                   ),
@@ -54,12 +58,12 @@ class FavoritesItem extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "${songData["title"]}",
+                    "${widget.songData["title"]}",
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "${songData["artist"]}",
+                    "${widget.songData["artist"]}",
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),

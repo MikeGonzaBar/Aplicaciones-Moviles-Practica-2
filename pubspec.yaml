@@ -44,6 +44,10 @@ dependencies:
   font_awesome_flutter: ^10.2.1
   path_provider: ^2.0.11
   flutter_dotenv: ^5.0.2
+  firebase_core: ^2.1.1
+  firebase_auth: ^4.1.1
+  cloud_firestore: ^4.0.4
+  flutterfire_ui: ^0.4.3+19
 
 dev_dependencies:
   flutter_test:
