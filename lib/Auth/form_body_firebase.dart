@@ -8,26 +8,47 @@ class FormBodyFirebase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SignInScreen(
-      showAuthActionSwitch: false,
-      headerBuilder: ((context, constraints, breakpoint) {
-        return Text('Header');
-      }),
-      providerConfigs: [
-        EmailProviderConfiguration(),
-        GoogleProviderConfiguration(clientId: googleKey)
-      ],
-      footerBuilder: (context, action) {
-        return Text('Footer');
-      },
-      actions: [
-        AuthStateChangeAction<SignedIn>((context, state) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => HomePage(),
-            ),
-          );
-        }),
+    // return SignInScreen(
+    //   showAuthActionSwitch: false,
+    //   headerBuilder: ((context, constraints, breakpoint) {
+    //     return Image.asset('assets/images/listening.gif');
+    //   }),
+    //   providerConfigs: [GoogleProviderConfiguration(clientId: googleKey)],
+    //   actions: [
+    //     AuthStateChangeAction<SignedIn>((context, state) {
+    //       Navigator.of(context).pushReplacement(
+    //         MaterialPageRoute(
+    //           builder: (context) => HomePage(),
+    //         ),
+    //       );
+    //     }),
+    //   ],
+    // );
+    return Stack(
+      children: <Widget>[
+        Container(
+          width: (MediaQuery.of(context).size.width),
+          height: (MediaQuery.of(context).size.height),
+          color: Colors.red,
+        ),
+        SignInScreen(
+          showAuthActionSwitch: false,
+          headerBuilder: ((context, constraints, breakpoint) {
+            return Image.asset('assets/images/listening.gif');
+          }),
+          providerConfigs: const [
+            GoogleProviderConfiguration(clientId: googleKey)
+          ],
+          actions: [
+            AuthStateChangeAction<SignedIn>((context, state) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+              );
+            }),
+          ],
+        ),
       ],
     );
   }

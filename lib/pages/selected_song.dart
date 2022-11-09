@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, must_be_immutable, deprecated_member_use
+// ignore_for_file: avoid_print, must_be_immutable, deprecated_member_use, use_build_context_synchronously
 
 import 'dart:developer';
 
@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:practica1/providers/favorite_song_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class SelectedSong extends StatefulWidget {
   final dynamic songData;
@@ -40,8 +39,7 @@ class _SelectedSongState extends State<SelectedSong> {
                 await _addSong(widget.songData);
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                    snackBarProcess(context, 'Canción agregada a favoritos'));
-                // Navigator.of(context).pop();
+                    snackBarProcess(context, 'Agregado a favoritos'));
               }
               widget.isFavorite = !widget.isFavorite;
               setState(() {});
@@ -89,13 +87,13 @@ class _SelectedSongState extends State<SelectedSong> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 platformButton("${widget.songData["spotify_url"]}",
-                    FaIcon(FontAwesomeIcons.spotify)),
+                    const FaIcon(FontAwesomeIcons.spotify)),
                 platformButton("${widget.songData["deezer_url"]}",
-                    FaIcon(FontAwesomeIcons.deezer)),
+                    const FaIcon(FontAwesomeIcons.deezer)),
                 platformButton("${widget.songData["apple_music_url"]}",
-                    FaIcon(FontAwesomeIcons.apple)),
+                    const FaIcon(FontAwesomeIcons.apple)),
                 platformButton("${widget.songData["other_urls"]}",
-                    FaIcon(FontAwesomeIcons.music)),
+                    const FaIcon(FontAwesomeIcons.music)),
               ],
             )
           ],
@@ -107,12 +105,6 @@ class _SelectedSongState extends State<SelectedSong> {
   SnackBar snackBarProcess(BuildContext context, String text) {
     return SnackBar(
       content: Text(text),
-      action: SnackBarAction(
-        label: 'ok',
-        onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        },
-      ),
     );
   }
 
@@ -148,12 +140,19 @@ class _SelectedSongState extends State<SelectedSong> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBarProcess(context, 'Eliminando de favoritos...'));
+
+              await _deleteSong(widget.songData);
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBarProcess(context, 'Eliminado de favoritos'));
               Navigator.pop(context, 'Eliminar');
-              print('DELETE ${widget.songData} to favorites');
-              _deleteSong(widget.songData);
-              // widget.isFavorite = !widget.isFavorite;
-              // setState(() {});
+              log(widget.isFavorite.toString());
+              setState(() {
+                widget.isFavorite = false;
+              });
+              log(widget.isFavorite.toString());
             },
             child: const Text('Eliminar'),
           ),

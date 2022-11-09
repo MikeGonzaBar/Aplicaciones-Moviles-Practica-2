@@ -1,22 +1,24 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:practica1/Auth/bloc/auth_bloc.dart';
 import 'package:practica1/pages/favorites.dart';
-import 'package:practica1/pages/login_page.dart';
 import 'package:practica1/pages/selected_song.dart';
 import 'package:practica1/providers/favorite_song_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
@@ -93,12 +95,7 @@ class _HomePageState extends State<HomePage> {
                 FloatingActionButton(
                   heroTag: "btn2",
                   onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => LoginPage(),
-                      ),
-                    );
+                    BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
                   },
                   backgroundColor: Colors.pink[500],
                   tooltip: "Cerrar sesión",

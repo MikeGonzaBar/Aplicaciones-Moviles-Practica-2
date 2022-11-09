@@ -10,10 +10,9 @@ import 'package:http/http.dart' as http;
 import '../credentials/credentials.dart' as credentials;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 class FavoriteProvider with ChangeNotifier {
-  final List<dynamic> _favsList = [];
+  List<dynamic> _favsList = [];
   List<dynamic> get getFavsList => _favsList;
 
   Future<bool> addNewSong(dynamic songObj) async {
@@ -53,7 +52,7 @@ class FavoriteProvider with ChangeNotifier {
           // log(newSongs.toString());
           log('NOT EXISTS');
           newSongs.add(songObj);
-          var updated = await FirebaseFirestore.instance
+          await FirebaseFirestore.instance
               .collection('musicfindapp')
               .doc(mySongs.docs.first.id)
               .update({'songs': newSongs})
@@ -61,6 +60,7 @@ class FavoriteProvider with ChangeNotifier {
               .catchError((error) => print("Failed to update user: $error"));
         }
       }
+      getSongsList();
 
       return true;
     } catch (e) {
@@ -85,12 +85,13 @@ class FavoriteProvider with ChangeNotifier {
       }
     }
     log(newSongList.toString());
-    var updated = await FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection('musicfindapp')
         .doc(mySongs.docs.first.id)
         .update({'songs': newSongList})
         .then((value) => print("User Updated"))
         .catchError((error) => print("Failed to update user: $error"));
+    getSongsList();
 
     // notifyListeners();
   }
@@ -105,7 +106,7 @@ class FavoriteProvider with ChangeNotifier {
       newSongFb = {
         'album':
             (songObject["album"] == null) ? 'N/A' : '${songObject["album"]}',
-        'apple_music_url': (songObject["apple_music"]["url"] == null)
+        'apple_music_url': (songObject["apple_music"] == null)
             ? '${songObject["song_link"]}'
             : '${songObject["apple_music"]["url"]}',
         'artist':
@@ -163,7 +164,8 @@ class FavoriteProvider with ChangeNotifier {
         .get();
     var mySongs = myCollection.docs.first.data()['songs'];
     log(mySongs.toString());
-    _favsList.addAll(mySongs);
+    _favsList = mySongs;
+    notifyListeners();
     return;
   }
 }

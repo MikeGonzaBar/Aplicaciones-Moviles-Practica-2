@@ -1,7 +1,9 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:practica1/pages/selected_song.dart';
+import 'package:practica1/providers/favorite_song_provider.dart';
+import 'package:provider/provider.dart';
 
 class FavoritesItem extends StatefulWidget {
   final dynamic songData;
@@ -71,13 +73,60 @@ class _FavoritesItemState extends State<FavoritesItem> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             top: 20,
             left: 50,
-            child: Icon(Icons.favorite),
+            child: IconButton(
+              color: Colors.red,
+              icon: const Icon(Icons.favorite),
+              onPressed: () async {
+                addAlert(context);
+              },
+            ),
           )
         ],
       ),
     );
+  }
+
+  Future<String?> addAlert(BuildContext context) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Eliminar de favoritos'),
+        content: const Text(
+            'El elemento será eliminado de tus favoritos ¿Quieres continuar?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, 'Cancelar');
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBarProcess(context, 'Eliminando de favoritos...'));
+
+              await _deleteSong(widget.songData);
+              ScaffoldMessenger.of(context).showSnackBar(
+                  snackBarProcess(context, 'Eliminado de favoritos'));
+              Navigator.pop(context, 'Eliminar');
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  SnackBar snackBarProcess(BuildContext context, String text) {
+    return SnackBar(
+      content: Text(text),
+    );
+  }
+
+  Future<void> _deleteSong(songData) async {
+    await context.read<FavoriteProvider>().deleteSong(widget.songData);
   }
 }

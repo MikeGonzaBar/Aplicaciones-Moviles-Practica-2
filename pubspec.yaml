@@ -48,6 +48,8 @@ dependencies:
   firebase_auth: ^4.1.1
   cloud_firestore: ^4.0.4
   flutterfire_ui: ^0.4.3+19
+  equatable: ^2.0.5
+  google_sign_in: ^5.4.2
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +73,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/listening.gif
+    - assets/images/sound-waves.gif
 
   # To add assets to your application, add an assets section, like this:
   # assets:
